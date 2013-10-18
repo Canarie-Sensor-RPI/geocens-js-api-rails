@@ -1,24 +1,35 @@
-# Geocens::Js::Api::Rails
+# GeoCENS JS API for Rails Asset Pipeline
 
-TODO: Write a gem description
+This gem will automatically include the [GeoCENS JS API](https://github.com/Canarie-Sensor-RPI/geocens-js-api) in the Rails Asset Pipeline for easy inclusion and upgrading.
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Add this line to your Rails application's Gemfile:
 
-    gem 'geocens-js-api-rails'
+    gem 'geocens-js-api-rails', github: 'Canarie-Sensor-RPI/geocens-js-api-rails'
 
 And then execute:
 
-    $ bundle
+    $ bundle install
 
-Or install it yourself as:
+You can optionally lock it to a specific version of the GeoCENS JS API using a tag:
 
-    $ gem install geocens-js-api-rails
+	gem 'geocens-js-api-rails', github: 'Canarie-Sensor-RPI/geocens-js-api-rails', tag: 'v1.0.1'
 
 ## Usage
 
-TODO: Write usage instructions here
+After installing the gem in your application, you can include the GeoCENS JS API libraries in your JS files using Sprockets require method:
+
+	// application.js example
+	//
+	//= require jquery
+	//= require highstock
+	//= require leaflet
+	//= require geocens
+	//= require geocens-chart
+	//= require geocens-map
+
+Note that you must install jQuery, Highcharts, and Leaflet yourself separately from this gem to use all the features of the GeoCENS JS API.
 
 ## Contributing
 
