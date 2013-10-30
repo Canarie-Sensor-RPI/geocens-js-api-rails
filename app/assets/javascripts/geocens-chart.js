@@ -1,4 +1,4 @@
-//    geocens-chart.js 1.1.1
+//    geocens-chart.js 1.1.2
 
 //    (c) 2013, James Badger, Geo Sensor Web Lab.
 //    All Rights Reserved.
@@ -85,10 +85,17 @@
   };
 
   $.fn.GeocensChart = function () {
+    var ret = [];
     var options = arguments[0];
     this.each(function () {
-      return new chart(this, options);
+      ret.push(new chart(this, options));
     });
+
+    if (ret.length === 1) {
+      return ret[0];
+    } else {
+      return ret;
+    }
   };
 
 })(jQuery);
