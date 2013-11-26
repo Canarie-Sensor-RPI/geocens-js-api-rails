@@ -14,7 +14,7 @@ And then execute:
 
 You can optionally lock it to a specific version of the GeoCENS JS API using a tag:
 
-	gem 'geocens-js-api-rails', github: 'Canarie-Sensor-RPI/geocens-js-api-rails', tag: 'v1.1.2'
+	gem 'geocens-js-api-rails', github: 'Canarie-Sensor-RPI/geocens-js-api-rails', tag: 'v1.1.3'
 
 ## Usage
 
