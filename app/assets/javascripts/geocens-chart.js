@@ -1,4 +1,4 @@
-//    geocens-chart.js 1.1.2
+//    geocens-chart.js 1.1.3
 
 //    (c) 2013, James Badger, Geo Sensor Web Lab.
 //    All Rights Reserved.
@@ -10,7 +10,8 @@
       defaults;
 
   defaults = root.defaults = {
-    chart: {}
+    chart: {},
+    dataEvents: {}
   };
 
   chart = root.chart = function(element, options) {
@@ -60,7 +61,8 @@
 
       series: [{
           name: datasource.name(),
-          data: seriesData
+          data: seriesData,
+          events: settings.dataEvents
       }],
 
       xAxis: {
@@ -76,7 +78,7 @@
       }
     };
 
-    var chartOptions = $.extend({}, chartDefaults, settings.chart);
+    var chartOptions = $.extend(true, {}, chartDefaults, settings.chart);
     var stockChart = new Highcharts.StockChart(chartOptions);
 
     return {
