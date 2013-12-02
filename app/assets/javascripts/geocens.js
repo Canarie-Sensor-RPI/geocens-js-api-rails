@@ -1,4 +1,4 @@
-//    GeoCENS.js 1.2.0
+//    GeoCENS.js 1.2.1
 
 //    (c) 2013, James Badger, Geo Sensor Web Lab.
 //    All Rights Reserved.
@@ -17,7 +17,7 @@
   Geocens = root.Geocens = {};
 
   // Current library version
-  Geocens.VERSION = '1.2.0';
+  Geocens.VERSION = '1.2.1';
 
   // Run Geocens in noConflict mode, which prevents Geocens from overwriting
   // whatever previously held the `Geocens` variable.
@@ -38,6 +38,28 @@
       pad(d.getUTCHours())     + ':' +
       pad(d.getUTCMinutes())   + ':' +
       pad(d.getUTCSeconds())   + 'Z';
+  };
+
+  // Convert Translation Engine time series readings format
+  Geocens.convertSOSReadings = function(readings) {
+    return $.map(readings, function(reading) {
+      var time = new Date(reading.time);
+
+      return {
+        timestamp: time.getTime(),
+        value:     parseFloat(reading.value)
+      };
+    });
+  };
+
+  // Convert Data Service time series readings format
+  Geocens.convertDataServiceReadings = function(readings) {
+    return $.map(readings, function(value) {
+      return {
+        timestamp: Date.parse(value.id),
+        value: parseFloat(value.reading)
+      };
+    });
   };
 
   // Geocens.Sensor
@@ -146,8 +168,8 @@
       return this._data;
     },
 
-    // Retrieve time series data for the datastream
-    getTimeSeries: function(options) {
+    // Retrieve raw time series data for the datastream
+    getRawTimeSeries: function(options) {
       var self = this,
           params,
           path;
@@ -196,15 +218,31 @@
         },
         data: params
       }).done(function (data) {
-        var convertedData = $.map(data, function(value) {
-          return {
-            timestamp: Date.parse(value.id),
-            value: parseFloat(value.reading)
-          };
-        });
-
-        self._cache(convertedData);
+        var convertedData = Geocens.convertDataServiceReadings(data);
         options.done(convertedData, self);
+      });
+
+    },
+
+    // Retrieve time series data for the datastream and cache locally
+    getTimeSeries: function(options) {
+      var self = this,
+          params,
+          path;
+
+      options || (options = {});
+      options.done || (options.done || function () {});
+
+      this.getRawTimeSeries({
+        limit: options.limit,
+        skip: options.skip,
+        end: options.end,
+        start: options.start,
+        recent: options.recent,
+        done: function (convertedData) {
+          self._cache(convertedData);
+          options.done(convertedData, self);
+        }
       });
 
     },
@@ -474,7 +512,7 @@
       });
     },
 
-    getTimeSeries: function(options) {
+    getRawTimeSeries: function(options) {
       var self = this,
           time, traceHours;
 
@@ -510,8 +548,25 @@
         }
       }).done(function (data) {
         var convertedData = self._convertSeriesData(data);
-        self._cache(convertedData);
         options.done(convertedData, self);
+      });
+    },
+
+    getTimeSeries: function(options) {
+      var self = this,
+          time, traceHours;
+
+      options || (options = {});
+      options.done || (options.done = function () {});
+
+      this.getRawTimeSeries({
+        api_key: options.api_key,
+        end: options.end,
+        start: options.start,
+        done: function (convertedData) {
+          self._cache(convertedData);
+          options.done(convertedData);
+        }
       });
     },
 
@@ -558,18 +613,6 @@
     // Default Translation Engine URL
     path: "http://dataservice.geocens.ca/translation_engine/",
 
-    // Convert Translation Engine Readings format
-    _convertReadings: function(readings) {
-      return $.map(readings, function(reading) {
-        var time = new Date(reading.time);
-
-        return {
-          timestamp: time.getTime(),
-          value:     parseFloat(reading.value)
-        };
-      });
-    },
-
     // Convert Translation Engine output to Objects
     _decode: function(data) {
       var self            = this,
@@ -583,7 +626,7 @@
           offering:     observations.offeringID,
           procedure_id: data.id,
           property:     observations.propertyName,
-          readings:     self._convertReadings(data.readings),
+          readings:     Geocens.convertSOSReadings(data.readings),
           service:      self
         });
       });
