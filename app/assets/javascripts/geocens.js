@@ -1,4 +1,4 @@
-//    GeoCENS.js 1.2.1
+//    GeoCENS.js 1.2.2
 
 //    (c) 2013, James Badger, Geo Sensor Web Lab.
 //    All Rights Reserved.
@@ -17,7 +17,7 @@
   Geocens = root.Geocens = {};
 
   // Current library version
-  Geocens.VERSION = '1.2.1';
+  Geocens.VERSION = '1.2.2';
 
   // Run Geocens in noConflict mode, which prevents Geocens from overwriting
   // whatever previously held the `Geocens` variable.
@@ -294,6 +294,31 @@
       }
     },
 
+    getApiKeyStatus: function(options) {
+      var self = this,
+          api_key_path;
+
+      options || (options = {});
+      options.done || (options.done = function () {});
+      options.fail || (options.fail = function () {});
+      options.api_key || (options.api_key = this.api_key);
+      this.api_key || (this.api_key = options.api_key);
+
+      api_key_path = this.path + "api_keys/" + this.api_key;
+
+      // Retrieve api key resource
+      $.ajax({
+        url: api_key_path,
+        type: 'GET',
+        dataType: 'json',
+        headers: {
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+      .done(options.done)
+      .fail(options.fail);
+    },
+
     // Retrieve datastream as Datastream object
     getDatastream: function(options) {
       var self = this,
@@ -521,15 +546,12 @@
 
       if (options.end !== undefined) {
         time = ISODateString(options.end);
-      } else {
-        options.end = new Date();
-        time = ISODateString(new Date());
       }
 
       if (options.start !== undefined) {
         traceHours = (options.end - options.start) / (1000 * 3600);
       } else {
-        traceHours = 24;
+        traceHours = options.interval;
       }
 
       $.ajax({
@@ -560,9 +582,10 @@
       options.done || (options.done = function () {});
 
       this.getRawTimeSeries({
-        api_key: options.api_key,
-        end: options.end,
-        start: options.start,
+        api_key:  options.api_key,
+        end:      options.end,
+        start:    options.start,
+        interval: options.interval,
         done: function (convertedData) {
           self._cache(convertedData);
           options.done(convertedData);
