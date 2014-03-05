@@ -1,4 +1,4 @@
-//    geocens.js 1.2.3
+//    geocens.js 1.2.4
 
 //    (c) 2013, James Badger, Geo Sensor Web Lab.
 //    All Rights Reserved.
@@ -17,7 +17,7 @@
   Geocens = root.Geocens = {};
 
   // Current library version
-  Geocens.VERSION = '1.2.2';
+  Geocens.VERSION = '1.2.4';
 
   // Run Geocens in noConflict mode, which prevents Geocens from overwriting
   // whatever previously held the `Geocens` variable.
@@ -516,6 +516,21 @@
       });
     },
 
+    // Check for error response from Translation Engine
+    _validateResponse: function(data) {
+      var isValid = true;
+      // Check for JSON error response
+      try {
+        JSON.parse(data);
+        isValid = false;
+      }
+      catch (e) {
+        // no-op
+      }
+
+      return isValid;
+    },
+
     describe: function(options) {
       var self = this;
 
@@ -543,6 +558,7 @@
 
       options || (options = {});
       options.done || (options.done = function () {});
+      options.fail || (options.fail = function () {});
 
       if (options.end === null || options.end === undefined) {
         time = "";
@@ -571,9 +587,13 @@
           traceHours:   traceHours
         }
       }).done(function (data) {
-        var convertedData = self._convertSeriesData(data);
-        options.done(convertedData, self);
-      });
+        if (self._validateResponse(data)) {
+          var convertedData = self._convertSeriesData(data);
+          options.done(convertedData, self);
+        } else {
+          options.fail(data, self);
+        }
+      }).fail(options.fail);
     },
 
     getTimeSeries: function(options) {
@@ -582,6 +602,7 @@
 
       options || (options = {});
       options.done || (options.done = function () {});
+      options.fail || (options.fail = function () {});
 
       this.getRawTimeSeries({
         api_key:  options.api_key,
@@ -591,7 +612,8 @@
         done: function (convertedData) {
           self._cache(convertedData);
           options.done(convertedData);
-        }
+        },
+        fail: options.fail
       });
     },
 
