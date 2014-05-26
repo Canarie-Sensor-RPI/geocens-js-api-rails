@@ -1,4 +1,4 @@
-//    geocens.js 1.2.4
+//    geocens.js 1.2.5
 
 //    (c) 2013, James Badger, Geo Sensor Web Lab.
 //    All Rights Reserved.
@@ -17,7 +17,7 @@
   Geocens = root.Geocens = {};
 
   // Current library version
-  Geocens.VERSION = '1.2.4';
+  Geocens.VERSION = '1.2.5';
 
   // Run Geocens in noConflict mode, which prevents Geocens from overwriting
   // whatever previously held the `Geocens` variable.
@@ -498,7 +498,7 @@
           year:   pieces[0],
           month:  pieces[1] - 1,
           day:    pieces[2],
-          hour:   pieces[3] - 1,
+          hour:   pieces[3],
           minute: pieces[4],
           second: pieces[5],
           zone:   pieces[6],
